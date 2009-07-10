@@ -1,0 +1,10 @@
+Fluxy
+====
+
+Simple test execution
+=====================
+To keep the browser open:
+FLUXY_KEEP_OPEN=1 ruby fluxy.rb 
+
+To exit browser when done:
+ruby fluxy.rb
