@@ -1,17 +1,18 @@
 require 'rubygems'
 #
 #$: << "./gems/firewatir-1.6.2/lib"
+$: << "./lib"
 require 'firewatir'
-require 'lib/firewatir_extension'
+require 'firewatir_extension'
+require 'ias_runner_adapter'
 
-include FireWatir
+include Fluxy
 
-@browser = Firefox.new
-@browser.goto("file:///#{File.expand_path(File.dirname(__FILE__))}/base_test.html")
+@url = "file:///#{File.expand_path(File.dirname(__FILE__))}/base_test.html"
 
-#sleep(3)
+@url = "http://localhost:3000/iasrunner/IASRunner.html"
 
-puts @browser.execute_script "document.getElementById('testDiv').innerHTML = 'set from ruby';"
+IASRunner.browse @url
+IASRunner.set_message "Set From Fluxy::IASRunner"
 
-puts @browser.execute_script("testCall()")
-@browser.close unless ENV["FLUXY_KEEP_OPEN"]
+IASRunner.exit unless ENV["FLUXY_KEEP_OPEN"]
