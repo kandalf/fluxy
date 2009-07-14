@@ -28,7 +28,6 @@ module Fluxy
     end
 
     def self.execute(selector, method, params)
-      
       jssh_command = "#{runner_js_object}.execute('#{selector}', '#{method}', #{parse_params(params)}"
       @@adapter.execute_js jssh_command
     end
@@ -39,6 +38,10 @@ module Fluxy
  
     def self.load_application(swf_url)
       @@adapter.execute_js "#{runner_js_object}.loadApplication('#{swf_url}')"   
+    end
+
+    def self.click(selector)
+      @@adapter.execute_js "#{runner_js_object}.click(#{selector})"
     end
 
     def self.exit
@@ -56,7 +59,7 @@ module Fluxy
         if param.is_a?(Array)
           ret_params << "[#{quotify_array(param).join(",")}]"
         elsif params.is_a?(Hash)
-          ret_params << "{#{quotify_hash(param)}}"
+          ret_params << "{#{quotify_hash(param).join(",")}}"
         end
       end
       ret_params
