@@ -4,7 +4,7 @@ require 'rubygems'
 $: << "./lib"
 require 'firewatir'
 require 'firewatir_extension'
-require 'ias_runner_adapter'
+require 'ias_runner'
 
 include Fluxy
 

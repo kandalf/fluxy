@@ -2,25 +2,13 @@ require 'rubygems'
 require 'firewatir'
 require 'firewatir_extension'
 require 'hash_extension'
+require 'firewatir_adapter'
+
 
 module Fluxy
+  FLEX_TIMEOUT = 3
+
   module IASRunner
-    class Adapter
-     attr_accessor :runner_object
-
-      def browser
-        @browser ||= FireWatir::Firefox.new
-      end
-
-      def execute_js(source)
-        browser.execute_script source
-      end
-  
-      def close_browser
-        browser.close
-      end
-    end
-
     @@adapter ||= Adapter.new
 
     def self.browse(url)
@@ -42,6 +30,10 @@ module Fluxy
 
     def self.click(selector)
       @@adapter.execute_js "#{runner_js_object}.click(#{selector})"
+    end
+
+    def self.find_text(text)
+      @@adapter.execute_js text
     end
 
     def self.exit
