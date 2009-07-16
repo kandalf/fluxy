@@ -2,13 +2,42 @@ require 'socket'
 
 module Fluxy
   class Receiver
-    attr_accessor :address, :port
+    attr_accessor :address, :port, :running
 
     def initialize(address = "0.0.0.0", port = 9999)
       @descriptors = Array.new
-      self.open(@address, @port) 
+      @ias_messages = {}
+      @running = false
+      @address = address
+      @port = port
     end
 
+ 
+    def start
+      self.open(@address, @port)
+      @running = true
+      run
+      #loop do  
+        #Thread.start(@server_socket.accept) do |s|  
+          #print(s, " is accepted\n")  
+          #s.write(Time.now)  
+          
+          #while !s.eof? && l = s.gets 
+            #puts l
+          #end
+
+          #print(s, " is gone\n")  
+          ##s.close  
+        #end  
+      #end  
+    end
+
+    def stop
+      @running = false
+      close
+    end
+
+    protected
     def open(address = "0.0.0.0", port = 9999)
       @address = address
       @port = 9999
@@ -21,7 +50,7 @@ module Fluxy
     end
 
     def run
-      while 1
+      while @running
         #select method waits for events for read, write, exceptions and returns an array of arrays with IO objects where the event ocurred
         sockets = select(@descriptors, nil, nil)
         
@@ -37,13 +66,15 @@ module Fluxy
               @descriptors.delete(socket)
             else
               msg = socket.gets.chomp
-              if (msg == "exit_fluxy_console")
-                close_connection(socket)
-              else
-                puts "Message from #{socket.peeraddr[2]}: #{msg}"
-                socket.puts "Fluxy Console: I don't care what you say!"
-                close_connection(socket, "EOF") if msg.empty?
-              end
+              puts msg
+              #@console.log "[RECEIVER - #{Time.now}] Received Message: #{msg}"
+              max_bytes = msg.split(": ")[1]
+              content = ''
+              socket.flush
+              socket.read(max_bytes.to_i, content)
+              puts "Content: #{content}"
+              socket.puts "<ack />"
+              close_connection(socket)
             end
           end
         end
@@ -51,7 +82,6 @@ module Fluxy
       end
     end
 
-    protected
     def accept_connection
       client_socket = @server_socket.accept
       puts "Client connected #{client_socket.peeraddr[2]} #{client_socket.peeraddr[1]}"
@@ -60,9 +90,14 @@ module Fluxy
 
     def close_connection(socket, message = nil)
       msg = "Disconnecting by request #{socket.peeraddr[2]}" unless message
-      socket.puts msg
+      #socket.puts msg
+      socket.flush
       socket.close
       @descriptors.delete(socket)
+    end
+
+    def process_message(msg)
+      puts "Message: #{msg}"
     end
   end
 end
